@@ -32,10 +32,11 @@ public class TestHeatMap : MonoBehaviour
 
     void Update()
     {
-        heatmap.SetHeatPoints(heatPoints.Select((v)=>new HeatPoint(){
+        heatmap.SetHeatPoints(heatPoints.Select((v) => new HeatPoint()
+        {
             point = transform.TransformPoint(v.point),
             radius = v.radius,
             intensity = v.intensity
-        }));
+        }).ToList());
     }
 }

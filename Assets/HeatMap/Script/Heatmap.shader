@@ -1,9 +1,4 @@
-﻿// Upgrade NOTE: replaced '_Object2World' with 'unity_ObjectToWorld'
-// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
-
-// Alan Zucconi
-// www.alanzucconi.com
-Shader "Custom/Heatmap" {
+﻿Shader "Custom/Heatmap" {
 	Properties{
 		_HeatTex("Texture", 2D) = "white" {}
 	}
@@ -17,12 +12,6 @@ Shader "Custom/Heatmap" {
 			#pragma vertex vert             
 			#pragma fragment frag
 
-			uniform int _Points_Length = 0;
-			uniform float4 _Points[100];		// (x, y, z) = world space position
-			uniform float4 _Properties[100];	// x = radius, y = intensity
-
-			sampler2D _HeatTex;
-
 			struct vertInput {
 				float4 pos : POSITION;
 			};
@@ -31,6 +20,17 @@ Shader "Custom/Heatmap" {
 				float4 pos : SV_POSITION;
 				half3 worldPos : TEXCOORD1;
 			};
+
+			struct PointInfo {
+				float3 position;	// (x, y, z) = world space position
+				float radius;		// radius
+				float intensity;	// intensity
+			};
+
+			StructuredBuffer<PointInfo> _PointBuffer;
+			int _Points_Length = 0;
+
+			sampler2D _HeatTex;
 
 			vertOutput vert(vertInput input) {
 				vertOutput o;
@@ -57,7 +57,7 @@ Shader "Custom/Heatmap" {
 
 				for (int i = 0; i < _Points_Length; i++)
 				{
-					float blob = Blob(output.worldPos.xyz,_Points[i].xyz,_Properties[i].x) * _Properties[i].y;
+					float blob = Blob(output.worldPos.xyz, _PointBuffer[i].position, _PointBuffer[i].radius) * _PointBuffer[i].intensity;
 					blobValue += blob;
 				}
 
